@@ -1,2 +1,2 @@
 # Buttonsweeper
-A mine game, in PowerShell
+A mine game, in PowerShell.
