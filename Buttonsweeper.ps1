@@ -2,12 +2,13 @@
 Add-Type -AssemblyName System.drawing
 
 $WelcomeText = "
-This is Button sweeper!
+This is Buttonsweeper!
 "
 
 $PlayedSec = 0
 
 function Process-Button($ButtonObj) {
+    $ButtonObj.visible = $false
     Write-Host $ButtonObj.Location
     Write-Host $ButtonObj.Name
     Write-Host "This is a test of the Process-Button function"
@@ -52,7 +53,7 @@ function Process-Button($ButtonObj) {
                     ) {$MineCount = ($MineCount + 1)}
                 }
             }
-        Write-Host $MineCount
+        #Write-Host $MineCount
         }
     }
 
@@ -133,16 +134,16 @@ function Generate-Game{
     $form1.add_Closing({$timer.Stop()})
 
     #Form Parameter
-    $form2 = New-Object System.Windows.Forms.Form
-    $form2.Text = "New Game"
-    $form2.Name = "NewGame"
-    $form2.DataBindings.DefaultDataSourceUpdateMode = 0
-    $System_Drawing_Size = New-Object System.Drawing.Size
-    $System_Drawing_Size.Height = 40 + (400 * $Multiplier)
-    $System_Drawing_Size.Width = 20 + (400 * $Multiplier)
-    $form2.FormBorderStyle = 'Fixed3D'
-    $form2.MaximizeBox = $false
-    $form2.ClientSize = $System_Drawing_Size
+#    $form2 = New-Object System.Windows.Forms.Form
+#    $form2.Text = "New Game"
+#    $form2.Name = "NewGame"
+#    $form2.DataBindings.DefaultDataSourceUpdateMode = 0
+#    $System_Drawing_Size = New-Object System.Drawing.Size
+#    $System_Drawing_Size.Height = 40 + (400 * $Multiplier)
+#    $System_Drawing_Size.Width = 20 + (400 * $Multiplier)
+#    $form2.FormBorderStyle = 'Fixed3D'
+#    $form2.MaximizeBox = $false
+#    $form2.ClientSize = $System_Drawing_Size
 
     $NewGameButton = New-Object System.Windows.Forms.Button
     $NewGameButton.Text = "ʘ‿ʘ"
@@ -169,7 +170,7 @@ function Generate-Game{
     $MineLocs = @()
     $Buttons = @()
     foreach($Mine in $Mines){$MinesList.Add((Get-Random -Maximum (400 * $Multiplier)))}
-    write-host $MinesList
+    #write-host $MinesList
 
     foreach($Row in $RowAmount){
         foreach($Box in $BoxAmount){
@@ -201,16 +202,15 @@ function Generate-Game{
                 if($Script:Playing -eq $true){
                     $timer.start()
                     if($MinesList -contains $this.Name){
+                        $timer.stop()
                         $this.BackColor = "Red"
                         $this.Font = [System.Drawing.Font]::new("Microsoft Sans Serif", 7, [System.Drawing.FontStyle]::Bold)
                         $this.TextAlign = [System.Drawing.ContentAlignment]::BottomLeft
                         $this.ForeColor = "Black"
                         $this.text = "@"
-                        $timer.stop()
                         $NewGameButton.Text = "ಠ_ಠ" # ಥ﹏ಥ
                         $Script:Playing = $false
                      }else{
-                        $this.visible = $false
                         Process-Button($this)
                         }
                     }
@@ -229,11 +229,13 @@ function Generate-Game{
         $StartPos = ($StartPosX,$StartPosY)
     }
     Write-Host "Mine locations:"
-    foreach($Mine in $MineLocs){Write-Host ($Mine.Location)}
-    Write-Host ""
-    Write-Host "Button locations:"
-    foreach($Button in $Buttons){Write-Host ($Button.Location)}
-    Write-Host $Count
+    $TotalMines = 0
+    foreach($Mine in $MineLocs){(Write-Host ($Mine.Location)), ($TotalMines = ($TotalMines + 1))}
+    Write-Host ($TotalMines.ToString() + " total mines.")
+    #Write-Host ""
+    #Write-Host "Button locations:"
+    #foreach($Button in $Buttons){Write-Host ($Button.Location)}
+    Write-Host ($Count.ToString() + " total buttons.")
 
     #Save the initial state of the form
     $InitialFormWindowState = $form1.WindowState
