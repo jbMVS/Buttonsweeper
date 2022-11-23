@@ -1,8 +1,6 @@
 ﻿Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.drawing
 
-#$Resolution = ()
-
 function New-Game {
 
     $NewGameForm = New-Object System.Windows.Forms.Form
@@ -14,6 +12,7 @@ function New-Game {
     $NewGameForm.MaximizeBox = $false
     $NewGameForm.ClientSize = $System_Drawing_Size
     $NewGameForm.StartPosition = 'CenterScreen'
+    $NewGameForm.TopMost = $true
     $NewGameForm.add_Closing({$NewGameForm.Dispose()})
 
     $WelcomeLabel = New-Object System.Windows.Forms.Label
@@ -76,6 +75,7 @@ function Generate-Game($Size) {
     $GameForm.MaximizeBox = $false
     $GameForm.ClientSize = $System_Drawing_Size
     $GameForm.StartPosition = 'CenterScreen'
+    $GameForm.TopMost = $true
     $GameForm.add_Closing({$timer.Stop(), $GameForm.Dispose()})
 
     $NewGameButton = New-Object System.Windows.Forms.Button
@@ -305,28 +305,11 @@ function Find-Surrounding($ButtonObj){
         
         }
 
-    foreach($Button in $Script:SurroundingButtons){$Script:ButtonsToClear = $Script:ButtonsToClear + $Button}
-
     foreach($Button in $Script:SurroundingButtons){
         
-        $Script:Ext1Buttons = $Script:SurroundingButtons | Where-Object {
-        
-        (($_.Location.X -eq $Button.Location.X) -and ($_.Location.Y -eq ($Button.Location.Y + 20))) -or # above
-        (($_.Location.X -eq $Button.Location.X) -and ($_.Location.Y -eq ($Button.Location.Y - 20))) -or # below
-        (($_.Location.X -eq ($Button.Location.X + 20)) -and ($_.Location.Y -eq $Button.Location.Y)) -or # left
-        (($_.Location.X -eq ($Button.Location.X - 20)) -and ($_.Location.Y -eq $Button.Location.Y)) -or # right
-        (($_.Location.X -eq ($Button.Location.X - 20)) -and ($_.Location.Y -eq ($Button.Location.Y -20))) -or # up left
-        (($_.Location.X -eq ($Button.Location.X + 20)) -and ($_.Location.Y -eq ($Button.Location.Y -20))) -or # up right
-        (($_.Location.X -eq ($Button.Location.X - 20)) -and ($_.Location.Y -eq ($Button.Location.Y +20))) -or # down left
-        (($_.Location.X -eq ($Button.Location.X + 20)) -and ($_.Location.Y -eq ($Button.Location.Y +20))) # down right
-
-        }
-
-    foreach($Button in $Script:SurroundingButtons){$Script:ButtonsToClear = $Script:ButtonsToClear + $Button}
-        
-        #if($MineButtons -notcontains $Button){
-        #    $Script:ButtonsToClear = $Script:ButtonsToClear + $Button
-        #    }
+        if($MineButtons -notcontains $Button){
+            $Script:ButtonsToClear = $Script:ButtonsToClear + $Button
+            }
         }
     }
 
