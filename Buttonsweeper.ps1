@@ -1,6 +1,7 @@
 ﻿Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.drawing
 
+## new gamge window
 function New-Game {
 
     $NewGameForm = New-Object System.Windows.Forms.Form
@@ -12,7 +13,6 @@ function New-Game {
     $NewGameForm.MaximizeBox = $false
     $NewGameForm.ClientSize = $System_Drawing_Size
     $NewGameForm.StartPosition = 'CenterScreen'
-    $NewGameForm.TopMost = $true
     $NewGameForm.add_Closing({$NewGameForm.Dispose()})
 
     $WelcomeLabel = New-Object System.Windows.Forms.Label
@@ -53,13 +53,13 @@ function New-Game {
     $NewGameForm.ShowDialog() | Out-Null
     }
 
-
+## generate game window
 function Generate-Game($Size) {
 
     try{$GameForm.Dispose(), $timer.Stop()}catch{}
 
-    $Playing = $false
-    $Started = $false
+    $Script:Playing = $false
+    $Script:Started = $false
     $PlayedSec = 0
 
     $timer = New-Object System.Windows.Forms.Timer
@@ -75,7 +75,6 @@ function Generate-Game($Size) {
     $GameForm.MaximizeBox = $false
     $GameForm.ClientSize = $System_Drawing_Size
     $GameForm.StartPosition = 'CenterScreen'
-    $GameForm.TopMost = $true
     $GameForm.add_Closing({$timer.Stop(), $GameForm.Dispose()})
 
     $NewGameButton = New-Object System.Windows.Forms.Button
@@ -98,7 +97,7 @@ function Generate-Game($Size) {
     $RemainderListBox.Height = 20
     $GameForm.Controls.Add($RemainderListBox)
 
-    # button generation
+    ## button generation
 
     $StartPosX = 10
     $StartPosY = 30
@@ -117,7 +116,8 @@ function Generate-Game($Size) {
     
     $Buttons = @()
     $MineButtons = @()
-    $NotMineButtons = @()   
+    $NotMineButtons = @()
+    $MineNeighbors = @()   
 
     foreach($Row in $RowAmount){
         foreach($Box in $BoxAmount){
@@ -128,7 +128,7 @@ function Generate-Game($Size) {
             $GridButton.Font = [System.Drawing.Font]::new("Microsoft Sans Serif", 10, [System.Drawing.FontStyle]::Bold)
             $GridButton.Text = (" ")
             $GridButton.Add_MouseUP({
-                if($_.Button -eq [System.Windows.Forms.MouseButtons]::Right ){
+                if($_.Button -eq [System.Windows.Forms.MouseButtons]::Right -and $Script:Playing -eq $true){
                     if($this.BackColor -ne "Red"){
                         if($this.text -eq " "){                
                             $this.ForeColor = "Red"
@@ -167,53 +167,40 @@ function Generate-Game($Size) {
     
     $MineButtons = $Buttons | Get-Random -Count ($Script:MineAmount) # gets $MineAmount of buttons and makes them minebuttons
 
-    # mine counter text / label generation
+    ## mine counter text / label generation
 
     foreach($Button in $Buttons){
-        $SurroundingMines = 0
-        foreach($MineButton in $MineButtons){
+
+        $SurroundingMineCount = 0
+        $SurroundingMines = $MineButtons | Where-Object {
             
-            if(($Button.Location.X -eq $MineButton.Location.X) -and ($Button.Location.Y -eq ($MineButton.Location.Y + 20))){ # mine below
-                $SurroundingMines = $SurroundingMines + 1
-                }
-            if(($Button.Location.X -eq ($MineButton.Location.X - 20)) -and ($Button.Location.Y -eq ($MineButton.Location.Y + 20))){ # mine below left
-                $SurroundingMines = $SurroundingMines + 1
-                }
-            if(($Button.Location.X -eq ($MineButton.Location.X + 20)) -and ($Button.Location.Y -eq ($MineButton.Location.Y + 20))){ # mine below right
-                $SurroundingMines = $SurroundingMines + 1
-                }
-            if(($Button.Location.X -eq $MineButton.Location.X) -and ($Button.Location.Y -eq ($MineButton.Location.Y - 20))){ # mine above
-                $SurroundingMines = $SurroundingMines + 1
-                }
-            if(($Button.Location.X -eq ($MineButton.Location.X - 20)) -and ($Button.Location.Y -eq ($MineButton.Location.Y - 20))){ # mine above left
-                $SurroundingMines = $SurroundingMines + 1
-                }
-            if(($Button.Location.X -eq ($MineButton.Location.X + 20)) -and ($Button.Location.Y -eq ($MineButton.Location.Y - 20))){ # mine above right
-                $SurroundingMines = $SurroundingMines + 1
-                }
-            if(($Button.Location.X -eq ($MineButton.Location.X +20)) -and ($Button.Location.Y -eq $MineButton.Location.Y)){ # mine to the right
-                $SurroundingMines = $SurroundingMines + 1
-                }
-            if(($Button.Location.X -eq ($MineButton.Location.X -20)) -and ($Button.Location.Y -eq $MineButton.Location.Y)){ # mine to the left
-                $SurroundingMines = $SurroundingMines + 1
-                }
+            (($_.Location.X -eq $Button.Location.X) -and ($_.Location.Y -eq ($Button.Location.Y + 20))) -or # above
+            (($_.Location.X -eq $Button.Location.X) -and ($_.Location.Y -eq ($Button.Location.Y - 20))) -or # below
+            (($_.Location.X -eq ($Button.Location.X + 20)) -and ($_.Location.Y -eq $Button.Location.Y)) -or # left
+            (($_.Location.X -eq ($Button.Location.X - 20)) -and ($_.Location.Y -eq $Button.Location.Y)) -or # right
+            (($_.Location.X -eq ($Button.Location.X - 20)) -and ($_.Location.Y -eq ($Button.Location.Y -20))) -or # up left
+            (($_.Location.X -eq ($Button.Location.X + 20)) -and ($_.Location.Y -eq ($Button.Location.Y -20))) -or # up right
+            (($_.Location.X -eq ($Button.Location.X - 20)) -and ($_.Location.Y -eq ($Button.Location.Y +20))) -or # down left
+            (($_.Location.X -eq ($Button.Location.X + 20)) -and ($_.Location.Y -eq ($Button.Location.Y +20))) # down right
             
+            }
+
+        foreach($Mine in $SurroundingMines){
+            $SurroundingMineCount = $SurroundingMineCount + 1
             }
 
         if($MineButtons -notcontains $Button){
-            if($Button.Visible -eq $false){
-                $NotMineButtons = $NotMineButtons + $Button
-                }
+            $NotMineButtons = $NotMineButtons + $Button
             }
 
-        if($SurroundingMines -ne 0){
+        if($SurroundingMineCount -ne 0){
             $ThisLabel = New-Object System.Windows.Forms.Label
             $ThisLabel.Name = ($Button.Name + 'Label')
-            $ThisLabel.Text = $SurroundingMines
+            $ThisLabel.Text = $SurroundingMineCount
             $ThisLabel.Font = [System.Drawing.Font]::new("Microsoft Sans Serif", 10, [System.Drawing.FontStyle]::Bold)
             $ThisLabel.Location = New-Object System.Drawing.Point(($Button.Location.X  + 4), ($Button.Location.Y + 2))
             $ThisLabel.Autosize = $true
-            switch($SurroundingMines){
+            switch($SurroundingMineCount){
                 (1){$ThisLabel.ForeColor = 'blue'}
                 (2){$ThisLabel.ForeColor = 'green'}
                 (3){$ThisLabel.ForeColor = 'red'}
@@ -223,7 +210,9 @@ function Generate-Game($Size) {
                 (7){$ThisLabel.ForeColor = 'black'}
                 (8){$ThisLabel.ForeColor = 'darkgray'}
                 }
-
+                 
+            $MineNeighbors = $MineNeighbors + $Button           
+            
             $GameForm.Controls.Add($ThisLabel)
             }
         }
@@ -231,18 +220,19 @@ function Generate-Game($Size) {
     $GameForm.ShowDialog()| Out-Null
     }
 
-
+## what happens when you press a button
 function Process-Button($ButtonObject) {
 
-    if($Playing -eq $false -and $Started -eq $false){
-        $Playing = $true
-        $Started = $true
+    if($Script:Playing -eq $false -and $Script:Started -eq $false){
+        $Script:Playing = $true
+        $Script:Started = $true
         $timer.Start()
         }
 
-    if($Playing -eq $true){
+    if($Script:Playing -eq $true){
         if($ButtonObject.Text -ne '!'){
             
+            #### # show button clicked, and coordinates of mines
             #debug//
 
             #Write-Host 'Button clicked: ' $ButtonObject.Name, $ButtonObject.Location
@@ -250,6 +240,7 @@ function Process-Button($ButtonObject) {
             #foreach($Mine in $MineButtons){Write-Host $Mine.Name $Mine.Location}
             
             #//           
+            ####
 
             if($MineButtons -contains $ButtonObject){
                 $Script:Playing = $false
@@ -267,61 +258,64 @@ function Process-Button($ButtonObject) {
                     $MineButton.Text = "@"
                     }
             }else{
+                
                 $ButtonObject.Visible = $false
-                $Script:ButtonsToClear = @()
+                    
                 Find-Surrounding($ButtonObject)
                 
-
-                #$LoopCount = 5
-                #
-                #while($LoopCount -gt 0){
-                #    foreach($Button in $Script:SurroundingButtons){
-                #        Find-Surrounding($Button)
-                #        }
-                #    $LoopCount = $LoopCount - 1
-                #    }
-                
-                
-                Clear-Buttons($Script:ButtonsToClear)
-                Check-IfWon                            
+                Check-IfWon 
                 }
             }
         }
     }
 
-
+## coordinate surrounding buttons
 function Find-Surrounding($ButtonObj){
 
-    $Script:SurroundingButtons = $Buttons | Where-Object {
-        
-        (($_.Location.X -eq $ButtonObj.Location.X) -and ($_.Location.Y -eq ($ButtonObj.Location.Y + 20))) -or # above
-        (($_.Location.X -eq $ButtonObj.Location.X) -and ($_.Location.Y -eq ($ButtonObj.Location.Y - 20))) -or # below
-        (($_.Location.X -eq ($ButtonObj.Location.X + 20)) -and ($_.Location.Y -eq $ButtonObj.Location.Y)) -or # left
-        (($_.Location.X -eq ($ButtonObj.Location.X - 20)) -and ($_.Location.Y -eq $ButtonObj.Location.Y)) -or # right
-        (($_.Location.X -eq ($ButtonObj.Location.X - 20)) -and ($_.Location.Y -eq ($ButtonObj.Location.Y -20))) -or # up left
-        (($_.Location.X -eq ($ButtonObj.Location.X + 20)) -and ($_.Location.Y -eq ($ButtonObj.Location.Y -20))) -or # up right
-        (($_.Location.X -eq ($ButtonObj.Location.X - 20)) -and ($_.Location.Y -eq ($ButtonObj.Location.Y +20))) -or # down left
-        (($_.Location.X -eq ($ButtonObj.Location.X + 20)) -and ($_.Location.Y -eq ($ButtonObj.Location.Y +20))) # down right
-        
-        }
+    $ButtonsToCheck = New-Object -TypeName 'System.Collections.ArrayList'
+    
+    $ButtonsToCheck.Add($ButtonObj)
 
-    foreach($Button in $Script:SurroundingButtons){
+    while($ButtonsToCheck.Count -gt 0){
+
+        $RemoveQueue = @()
+        $AddQueue = @()
+
+        foreach($Button in $ButtonsToCheck){
+            
+            $SurroundingButtons = $Buttons | Where-Object {
         
-        if($MineButtons -notcontains $Button){
-            $Script:ButtonsToClear = $Script:ButtonsToClear + $Button
+                (($_.Location.X -eq $Button.Location.X) -and ($_.Location.Y -eq ($Button.Location.Y + 20))) -or # above
+                (($_.Location.X -eq $Button.Location.X) -and ($_.Location.Y -eq ($Button.Location.Y - 20))) -or # below
+                (($_.Location.X -eq ($Button.Location.X + 20)) -and ($_.Location.Y -eq $Button.Location.Y)) -or # left
+                (($_.Location.X -eq ($Button.Location.X - 20)) -and ($_.Location.Y -eq $Button.Location.Y)) -or # right
+                (($_.Location.X -eq ($Button.Location.X - 20)) -and ($_.Location.Y -eq ($Button.Location.Y -20))) -or # up left
+                (($_.Location.X -eq ($Button.Location.X + 20)) -and ($_.Location.Y -eq ($Button.Location.Y -20))) -or # up right
+                (($_.Location.X -eq ($Button.Location.X - 20)) -and ($_.Location.Y -eq ($Button.Location.Y +20))) -or # down left
+                (($_.Location.X -eq ($Button.Location.X + 20)) -and ($_.Location.Y -eq ($Button.Location.Y +20))) # down right
+    
+                }
+
+            foreach($SurButton in $SurroundingButtons){
+                if($MineButtons -notcontains $SurButton -and $SurButton.Visible -eq $true){
+                    $SurButton.Visible = $false
+                    if($MineNeighbors -notcontains $SurButton){
+                        $AddQueue = $AddQueue + $SurButton # queue of buttons to be ADDED to ButtonsToCheck                   
+                        }
+                    }
+                }
+            $RemoveQueue = $RemoveQueue + $Button # queue of buttons to be REMOVED from ButtonsToCheck
+            }
+        foreach($Button in $RemoveQueue){
+            $ButtonsToCheck.Remove($Button)
+            }
+        foreach($Button in $AddQueue){
+            $ButtonsToCheck.Add($Button)
             }
         }
     }
 
-
-function Clear-Buttons($ButtonList){
-
-    foreach($Button in $ButtonList){
-        $Button.Visible = $false
-        }
-    }
-
-
+## calculate remaining visible buttons that are not mines, if game won show complete screen
 function Check-IfWon{
 
     $VisibleButtons = 0
@@ -331,10 +325,16 @@ function Check-IfWon{
             }        
         }
     if($VisibleButtons -eq 0){
+        $Script:Playing = $false
         $timer.Stop()
-        Write-Host 'YOU WON!!! ... In' $TimerListBox.Items 'seconds.'
+        switch($Size){
+        (1) {$GameMode = 'Easy'} # easy number of mines
+        (2) {$GameMode = 'Medium'} # medium number of mines
+        (3) {$GameMode = 'Medium'} # hard number of mines
+        }
+        Write-Host 'YOU WON!!! ... You beat' $GameMode 'mode in' $TimerListBox.Items 'seconds.'
         }
     }
 
-
+## start the game
 New-Game
