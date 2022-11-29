@@ -1,4 +1,4 @@
-Add-Type -AssemblyName System.Windows.Forms
+﻿Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.drawing
 
 ## new game window
@@ -13,6 +13,7 @@ function New-Game {
     $NewGameForm.MaximizeBox = $false
     $NewGameForm.ClientSize = $System_Drawing_Size
     $NewGameForm.StartPosition = 'CenterScreen'
+    $NewGameForm.TopMost = $true
     $NewGameForm.add_Closing({$NewGameForm.Dispose()})
 
     $WelcomeLabel = New-Object System.Windows.Forms.Label
@@ -75,10 +76,11 @@ function New-GameBoard($Size) {
     $GameForm.MaximizeBox = $false
     $GameForm.ClientSize = $System_Drawing_Size
     $GameForm.StartPosition = 'CenterScreen'
+    $GameForm.TopMost = $true
     $GameForm.add_Closing({$timer.Stop(), $GameForm.Dispose()})
 
     $NewGameButton = New-Object System.Windows.Forms.Button
-    $NewGameButton.Text = "= )" # ʘ‿ʘ
+    $NewGameButton.Text = "ʘ‿ʘ" # ʘ‿ʘ # = ) # the more complicated face requires UTF-8 with BOM
     $NewGameButton.Location = New-Object System.Drawing.Point(((100 * $Size)-20), 4)
     $NewGameButton.Size = New-Object System.Drawing.Size(60,24)
     $NewGameButton.Add_Click({New-Game})
@@ -245,7 +247,7 @@ function Use-Button($ButtonObject) {
                 $ButtonObject.TextAlign = [System.Drawing.ContentAlignment]::BottomLeft
                 $ButtonObject.ForeColor = "Black"
                 $ButtonObject.text = "@"
-                $NewGameButton.Text = "= (" # ಠ_ಠ
+                $NewGameButton.Text = "ಠ_ಠ" # ಠ_ಠ # = ( # more complicated face requires UTF-8 with BOM
                 foreach($MineButton in $MineButtons){
                     $MineButton.Font = [System.Drawing.Font]::new("Microsoft Sans Serif", 7, [System.Drawing.FontStyle]::Bold)
                     $MineButton.TextAlign = [System.Drawing.ContentAlignment]::BottomLeft
@@ -323,7 +325,7 @@ function Test-IfWon{
         (2) {$GameMode = 'Medium'} # medium number of mines
         (3) {$GameMode = 'Hard'} # hard number of mines
             }
-        $NewGameButton.Text = "= D" # (╯°□°）╯
+        $NewGameButton.Text = "(╯°□°）╯" # (╯°□°）╯ # = D # more complicated face requires UTF-8 with BOM
         [System.Windows.Forms.MessageBox]::Show(('YOU WON!!! ... You beat ') + $GameMode  + (' mode in ') + $TimerListBox.Items + (' seconds.'))
         }
     }
