@@ -1,4 +1,4 @@
-﻿Add-Type -AssemblyName System.Windows.Forms
+Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.drawing
 
 ## new game window
@@ -26,21 +26,21 @@ function New-Game {
     $EasyButton.Text = "Easy"
     $EasyButton.Location = New-Object System.Drawing.Point(15, 80)
     $EasyButton.Size = New-Object System.Drawing.Size(80,20)
-    $EasyButton.Add_Click({($Multiplier = 1), ($Script:PlayedSec = 0), ($NewGameForm.Dispose()), (Generate-Game($Multiplier))})
+    $EasyButton.Add_Click({($Multiplier = 1), ($Script:PlayedSec = 0), ($NewGameForm.Dispose()), (New-GameBoard($Multiplier))})
     $NewGameForm.Controls.Add($EasyButton)
 
     $MediumButton = New-Object System.Windows.Forms.Button
     $MediumButton.Text = "Medium"
     $MediumButton.Location = New-Object System.Drawing.Point(110, 80)
     $MediumButton.Size = New-Object System.Drawing.Size(80,20)
-    $MediumButton.Add_Click({($Multiplier = 2), ($Script:PlayedSec = 0), ($NewGameForm.Dispose()), (Generate-Game($Multiplier))})
+    $MediumButton.Add_Click({($Multiplier = 2), ($Script:PlayedSec = 0), ($NewGameForm.Dispose()), (New-GameBoard($Multiplier))})
     $NewGameForm.Controls.Add($MediumButton)
 
     $HardButton = New-Object System.Windows.Forms.Button
     $HardButton.Text = "Hard"
     $HardButton.Location = New-Object System.Drawing.Point(205, 80)
     $HardButton.Size = New-Object System.Drawing.Size(80,20)
-    $HardButton.Add_Click({($Multiplier = 3), ($Script:PlayedSec = 0),($NewGameForm.Dispose()), (Generate-Game($Multiplier))})
+    $HardButton.Add_Click({($Multiplier = 3), ($Script:PlayedSec = 0),($NewGameForm.Dispose()), (New-GameBoard($Multiplier))})
     $NewGameForm.Controls.Add($HardButton)
 
     $ScoreButton = New-Object System.Windows.Forms.Button
@@ -54,7 +54,7 @@ function New-Game {
     }
 
 ## generate game window
-function Generate-Game($Size) {
+function New-GameBoard($Size) {
 
     try{$GameForm.Dispose(), $timer.Stop()}catch{}
 
@@ -78,7 +78,7 @@ function Generate-Game($Size) {
     $GameForm.add_Closing({$timer.Stop(), $GameForm.Dispose()})
 
     $NewGameButton = New-Object System.Windows.Forms.Button
-    $NewGameButton.Text = "ʘ‿ʘ"
+    $NewGameButton.Text = "= )" # ʘ‿ʘ
     $NewGameButton.Location = New-Object System.Drawing.Point(((100 * $Size)-20), 4)
     $NewGameButton.Size = New-Object System.Drawing.Size(60,24)
     $NewGameButton.Add_Click({New-Game})
@@ -152,7 +152,7 @@ function Generate-Game($Size) {
                     }
                 })
             $GridButton.Add_Click({
-                Process-Button($this)
+                Use-Button($this)
                 })
             $GameForm.Controls.Add($GridButton)
             $StartPosX = $StartPosX + 20
@@ -221,7 +221,7 @@ function Generate-Game($Size) {
     }
 
 ## what happens when you press a button
-function Process-Button($ButtonObject) {
+function Use-Button($ButtonObject) {
 
     if($Script:Playing -eq $false -and $Script:Started -eq $false){
         $Script:Playing = $true
@@ -233,7 +233,6 @@ function Process-Button($ButtonObject) {
         if($ButtonObject.Text -ne '!'){
             
             #### # show button clicked, and coordinates of mines
-            #debug//
             #Write-Host 'Button clicked: ' $ButtonObject.Name, $ButtonObject.Location
             #Write-Host 'Mine locations: '
             #foreach($Mine in $MineButtons){Write-Host $Mine.Name $Mine.Location}
@@ -246,7 +245,7 @@ function Process-Button($ButtonObject) {
                 $ButtonObject.TextAlign = [System.Drawing.ContentAlignment]::BottomLeft
                 $ButtonObject.ForeColor = "Black"
                 $ButtonObject.text = "@"
-                $NewGameButton.Text = "ಠ_ಠ"
+                $NewGameButton.Text = "= (" # ಠ_ಠ
                 foreach($MineButton in $MineButtons){
                     $MineButton.Font = [System.Drawing.Font]::new("Microsoft Sans Serif", 7, [System.Drawing.FontStyle]::Bold)
                     $MineButton.TextAlign = [System.Drawing.ContentAlignment]::BottomLeft
@@ -259,7 +258,7 @@ function Process-Button($ButtonObject) {
                     
                 Find-Surrounding($ButtonObject)
                 
-                Check-IfWon 
+                Test-IfWon 
                 }
             }
         }
@@ -312,7 +311,7 @@ function Find-Surrounding($ButtonObj){
     }
 
 ## calculate remaining visible buttons that are not mines, if game won show complete screen
-function Check-IfWon{
+function Test-IfWon{
 
     $VisibleButtons = $NotMineButtons | Where-Object {$_.Visible -eq $true}
     
@@ -324,7 +323,7 @@ function Check-IfWon{
         (2) {$GameMode = 'Medium'} # medium number of mines
         (3) {$GameMode = 'Hard'} # hard number of mines
             }
-        $NewGameButton.Text = "(╯°□°）╯"
+        $NewGameButton.Text = "= D" # (╯°□°）╯
         [System.Windows.Forms.MessageBox]::Show(('YOU WON!!! ... You beat ') + $GameMode  + (' mode in ') + $TimerListBox.Items + (' seconds.'))
         }
     }
