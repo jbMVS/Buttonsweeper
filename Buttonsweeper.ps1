@@ -1,7 +1,7 @@
 ﻿Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.drawing
 
-## new gamge window
+## new game window
 function New-Game {
 
     $NewGameForm = New-Object System.Windows.Forms.Form
@@ -44,10 +44,10 @@ function New-Game {
     $NewGameForm.Controls.Add($HardButton)
 
     $ScoreButton = New-Object System.Windows.Forms.Button
-    $ScoreButton.Text = "High Scores"
+    $ScoreButton.Text = "Wikipedia"
     $ScoreButton.Location = New-Object System.Drawing.Point(110, 115)
     $ScoreButton.Size = New-Object System.Drawing.Size(80,20)
-    $ScoreButton.Add_Click({})
+    $ScoreButton.Add_Click({Start-Process 'https://en.wikipedia.org/wiki/Minesweeper_(video_game)'})
     $NewGameForm.Controls.Add($ScoreButton)
 
     $NewGameForm.ShowDialog() | Out-Null
@@ -79,8 +79,8 @@ function Generate-Game($Size) {
 
     $NewGameButton = New-Object System.Windows.Forms.Button
     $NewGameButton.Text = "ʘ‿ʘ"
-    $NewGameButton.Location = New-Object System.Drawing.Point(((100 * $Size)-15), 4)
-    $NewGameButton.Size = New-Object System.Drawing.Size(50,24)
+    $NewGameButton.Location = New-Object System.Drawing.Point(((100 * $Size)-20), 4)
+    $NewGameButton.Size = New-Object System.Drawing.Size(60,24)
     $NewGameButton.Add_Click({New-Game})
     $GameForm.Controls.Add($NewGameButton)
     
@@ -234,13 +234,9 @@ function Process-Button($ButtonObject) {
             
             #### # show button clicked, and coordinates of mines
             #debug//
-
             #Write-Host 'Button clicked: ' $ButtonObject.Name, $ButtonObject.Location
             #Write-Host 'Mine locations: '
             #foreach($Mine in $MineButtons){Write-Host $Mine.Name $Mine.Location}
-            
-            #//           
-            ####
 
             if($MineButtons -contains $ButtonObject){
                 $Script:Playing = $false
@@ -297,7 +293,7 @@ function Find-Surrounding($ButtonObj){
                 }
 
             foreach($SurButton in $SurroundingButtons){
-                if($MineButtons -notcontains $SurButton -and $SurButton.Visible -eq $true){
+                if($MineButtons -notcontains $SurButton -and $SurButton.Visible -eq $true -and $SurButton.Text -ne '!' -and $SurButton.Text -ne '?'){
                     $SurButton.Visible = $false
                     if($MineNeighbors -notcontains $SurButton){
                         $AddQueue = $AddQueue + $SurButton # queue of buttons to be ADDED to ButtonsToCheck                   
@@ -318,21 +314,18 @@ function Find-Surrounding($ButtonObj){
 ## calculate remaining visible buttons that are not mines, if game won show complete screen
 function Check-IfWon{
 
-    $VisibleButtons = 0
-    foreach($Button in $NotMineButtons){
-        if($Button.Visible -eq $true){
-            $VisibleButtons = $VisibleButtons + 1
-            }        
-        }
-    if($VisibleButtons -eq 0){
+    $VisibleButtons = $NotMineButtons | Where-Object {$_.Visible -eq $true}
+    
+    if($VisibleButtons.Count -eq 0){
         $Script:Playing = $false
         $timer.Stop()
         switch($Size){
         (1) {$GameMode = 'Easy'} # easy number of mines
         (2) {$GameMode = 'Medium'} # medium number of mines
-        (3) {$GameMode = 'Medium'} # hard number of mines
-        }
-        Write-Host 'YOU WON!!! ... You beat' $GameMode 'mode in' $TimerListBox.Items 'seconds.'
+        (3) {$GameMode = 'Hard'} # hard number of mines
+            }
+        $NewGameButton.Text = "(╯°□°）╯"
+        [System.Windows.Forms.MessageBox]::Show(('YOU WON!!! ... You beat ') + $GameMode  + (' mode in ') + $TimerListBox.Items + (' seconds.'))
         }
     }
 
