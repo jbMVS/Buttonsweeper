@@ -1,4 +1,10 @@
-﻿Add-Type -AssemblyName System.Windows.Forms
+﻿# Buttonsweeper - A mine game, in PowerShell
+
+# File must be saved as UTF-8 with BOM in order for emoji faces to appear correctly (open in notepad and save-as)
+# Running the script will create a scores.csv file in the parent directly, if one is not present
+# When getting a high-score, scores.csv will be appended with the username, score, date, and game mode
+
+Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.drawing
 
 ## new game window
@@ -19,9 +25,15 @@ function New-Game {
     $WelcomeLabel = New-Object System.Windows.Forms.Label
     $WelcomeLabel.Text = 'Welcome to Buttonsweeper!'
     $WelcomeLabel.Font = New-Object System.Drawing.Font("Microsoft Sans Serif", 12, [System.Drawing.FontStyle]::Regular)
-    $WelcomeLabel.Location = New-Object System.Drawing.Point(46,30)
+    $WelcomeLabel.Location = New-Object System.Drawing.Point(48,25)
     $WelcomeLabel.Autosize = $true
     $NewGameForm.Controls.Add($WelcomeLabel)
+
+    $SubtitleLabel = New-Object System.Windows.Forms.Label
+    $SubtitleLabel.Text = 'A mine game, in PowerShell'
+    $SubtitleLabel.Location = New-Object System.Drawing.Point(80,50)
+    $SubtitleLabel.Autosize = $true
+    $NewGameForm.Controls.Add($SubtitleLabel)
 
     $EasyButton = New-Object System.Windows.Forms.Button
     $EasyButton.Text = "Easy"
@@ -45,10 +57,10 @@ function New-Game {
     $NewGameForm.Controls.Add($HardButton)
 
     $ScoreButton = New-Object System.Windows.Forms.Button
-    $ScoreButton.Text = "Wikipedia"
+    $ScoreButton.Text = "High Scores"
     $ScoreButton.Location = New-Object System.Drawing.Point(110, 115)
     $ScoreButton.Size = New-Object System.Drawing.Size(80,20)
-    $ScoreButton.Add_Click({Start-Process 'https://en.wikipedia.org/wiki/Minesweeper_(video_game)'})
+    $ScoreButton.Add_Click({Get-HighScores})
     $NewGameForm.Controls.Add($ScoreButton)
 
     $NewGameForm.ShowDialog() | Out-Null
@@ -58,6 +70,9 @@ function New-Game {
 function New-GameBoard($Size) {
 
     try{$GameForm.Dispose(), $timer.Stop()}catch{}
+
+    $CurrentScores = Import-Csv -Path '.\scores.csv'
+    $CurrentScores | ForEach-Object {$_.Score = [int]$_.Score}
 
     $Script:Playing = $false
     $Script:Started = $false
@@ -100,7 +115,6 @@ function New-GameBoard($Size) {
     $GameForm.Controls.Add($RemainderListBox)
 
     ## button generation
-
     $StartPosX = 10
     $StartPosY = 30
     $StartPos = ($StartPosX, $StartPosY)
@@ -116,10 +130,10 @@ function New-GameBoard($Size) {
 
     $RemainderListBox.Items.Add($Script:MineAmount)
     
-    $Buttons = @()
-    $MineButtons = @()
-    $NotMineButtons = @()
-    $MineNeighbors = @()   
+    $Buttons = @() # an array of all buttons
+    $MineButtons = @() # an array of just buttons containing mines
+    $NotMineButtons = @() # array of just buttons not containing mines
+    $MineNeighbors = @() # array of buttons neighboring mines, for processing what to clear
 
     foreach($Row in $RowAmount){
         foreach($Box in $BoxAmount){
@@ -170,7 +184,6 @@ function New-GameBoard($Size) {
     $MineButtons = $Buttons | Get-Random -Count ($Script:MineAmount) # gets $MineAmount of buttons and makes them minebuttons
 
     ## mine counter text / label generation
-
     foreach($Button in $Buttons){
 
         $SurroundingMineCount = 0
@@ -255,11 +268,8 @@ function Use-Button($ButtonObject) {
                     $MineButton.Text = "@"
                     }
             }else{
-                
-                $ButtonObject.Visible = $false
-                    
+                $ButtonObject.Visible = $false    
                 Find-Surrounding($ButtonObject)
-                
                 Test-IfWon 
                 }
             }
@@ -318,17 +328,170 @@ function Test-IfWon{
     $VisibleButtons = $NotMineButtons | Where-Object {$_.Visible -eq $true}
     
     if($VisibleButtons.Count -eq 0){
-        $Script:Playing = $false
         $timer.Stop()
+        $Script:Playing = $false
+        $TopMessage = ""
+        $TopScore = $false
+        $NewGameButton.Text = "(╯°□°）╯" # (╯°□°）╯ # = D # more complicated face requires UTF-8 with BOM
         switch($Size){
         (1) {$GameMode = 'Easy'} # easy number of mines
         (2) {$GameMode = 'Medium'} # medium number of mines
         (3) {$GameMode = 'Hard'} # hard number of mines
             }
-        $NewGameButton.Text = "(╯°□°）╯" # (╯°□°）╯ # = D # more complicated face requires UTF-8 with BOM
-        [System.Windows.Forms.MessageBox]::Show(('YOU WON!!! ... You beat ') + $GameMode  + (' mode in ') + $TimerListBox.Items + (' seconds.'))
+        
+        ## checks for high score
+        $PlayerScore = $TimerListBox.Items
+        $ModeScores = $CurrentScores | Where-Object {$_.Mode -eq $GameMode} | Sort-Object Score | Select-Object -First 11
+        foreach($Score in $ModeScores){
+            if($PlayerScore -lt $Score.Score -or $ModeScores.Count -lt 11){
+                $TopMessage = "HIGH SCORE!"
+                $Today = (Get-Date).ToString('MM/dd/yy')
+                $TopScore = $true
+            }
+        }
+        if($TopScore -eq $true){
+            "$env:USERNAME, $PlayerScore, $Today, $GameMode" | Out-File '.\scores.csv' -Append
+        }
+
+        [System.Windows.Forms.MessageBox]::Show(('     YOU WON!!!     You beat ') + $GameMode  + (' mode in ') + $TimerListBox.Items + (' seconds.'), $TopMessage)
+        if($TopScore -eq $true){Get-HighScores}
         }
     }
+
+## handle high score info
+$CurrentScores = Get-ChildItem -Path '.\scores.csv'  -ErrorAction SilentlyContinue
+if($null -eq $CurrentScores){
+    'Name,Score,Date,Mode' | Out-File '.\scores.csv'
+    '0,0,0,Easy','0,0,0,Medium','0,0,0,Hard' | Out-File '.\scores.csv' -Append
+}
+
+## generates the high score window
+function Get-HighScores {
+
+    $HighScoresForm = New-Object System.Windows.Forms.Form
+    $HighScoresForm.Text = "High Scores"
+    $System_Drawing_Size = New-Object System.Drawing.Size
+    $System_Drawing_Size.Height = 565
+    $System_Drawing_Size.Width = 340
+    $HighScoresForm.FormBorderStyle = 'Fixed3D'
+    $HighScoresForm.MaximizeBox = $false
+    $HighScoresForm.ClientSize = $System_Drawing_Size
+    $HighScoresForm.StartPosition = 'CenterScreen'
+    $HighScoresForm.TopMost = $true
+    $HighScoresForm.add_Closing({$HighScoresForm.Dispose()})
+    
+    $HighScoresLabel = New-Object System.Windows.Forms.Label
+    $HighScoresLabel.Text = 'High Scores'
+    $HighScoresLabel.Font = New-Object System.Drawing.Font("Microsoft Sans Serif", 12, [System.Drawing.FontStyle]::Regular)
+    $HighScoresLabel.Location = New-Object System.Drawing.Point(123,10)
+    $HighScoresLabel.Autosize = $true
+    $HighScoresForm.Controls.Add($HighScoresLabel)
+
+    $EasyLabel = New-Object System.Windows.Forms.Label
+    $EasyLabel.Text = 'Easy'
+    $EasyLabel.Location = New-Object System.Drawing.Point(10,35)
+    $EasyLabel.Font = New-Object System.Drawing.Font("Microsoft Sans Serif", 10, [System.Drawing.FontStyle]::Regular)
+    $EasyLabel.Autosize = $true
+    $HighScoresForm.Controls.Add($EasyLabel)
+    
+    $NameListBoxEasy = New-Object System.Windows.Forms.ListBox
+    $NameListBoxEasy.Location = New-Object System.Drawing.Point(10,60)
+    $NameListBoxEasy.Size = New-Object System.Drawing.Size(100,20)
+    $NameListBoxEasy.Height = 140
+    $HighScoresForm.Controls.Add($NameListBoxEasy)
+    
+    $ScoreListBoxEasy = New-Object System.Windows.Forms.ListBox
+    $ScoreListBoxEasy.Location = New-Object System.Drawing.Point(120,60)
+    $ScoreListBoxEasy.Size = New-Object System.Drawing.Size(100,20)
+    $ScoreListBoxEasy.Height = 140
+    $HighScoresForm.Controls.Add($ScoreListBoxEasy)
+    
+    $DateListBoxEasy = New-Object System.Windows.Forms.ListBox
+    $DateListBoxEasy.Location = New-Object System.Drawing.Point(230,60)
+    $DateListBoxEasy.Size = New-Object System.Drawing.Size(100,20)
+    $DateListBoxEasy.Height = 140
+    $HighScoresForm.Controls.Add($DateListBoxEasy)
+
+    $MediumLabel = New-Object System.Windows.Forms.Label
+    $MediumLabel.Text = 'Medium'
+    $MediumLabel.Location = New-Object System.Drawing.Point(10,205)
+    $MediumLabel.Font = New-Object System.Drawing.Font("Microsoft Sans Serif", 10, [System.Drawing.FontStyle]::Regular)
+    $MediumLabel.Autosize = $true
+    $HighScoresForm.Controls.Add($MediumLabel)
+
+    $NameListBoxMedium = New-Object System.Windows.Forms.ListBox
+    $NameListBoxMedium.Location = New-Object System.Drawing.Point(10,230)
+    $NameListBoxMedium.Size = New-Object System.Drawing.Size(100,20)
+    $NameListBoxMedium.Height = 140
+    $HighScoresForm.Controls.Add($NameListBoxMedium)
+
+    $ScoreListBoxMedium = New-Object System.Windows.Forms.ListBox
+    $ScoreListBoxMedium.Location = New-Object System.Drawing.Point(120,230)
+    $ScoreListBoxMedium.Size = New-Object System.Drawing.Size(100,20)
+    $ScoreListBoxMedium.Height = 140
+    $HighScoresForm.Controls.Add($ScoreListBoxMedium)
+    
+    $DateListBoxMedium = New-Object System.Windows.Forms.ListBox
+    $DateListBoxMedium.Location = New-Object System.Drawing.Point(230,230)
+    $DateListBoxMedium.Size = New-Object System.Drawing.Size(100,20)
+    $DateListBoxMedium.Height = 140
+    $HighScoresForm.Controls.Add($DateListBoxMedium)
+
+    $HardLabel = New-Object System.Windows.Forms.Label
+    $HardLabel.Text = 'Hard'
+    $HardLabel.Location = New-Object System.Drawing.Point(10,375)
+    $HardLabel.Font = New-Object System.Drawing.Font("Microsoft Sans Serif", 10, [System.Drawing.FontStyle]::Regular)
+    $HardLabel.Autosize = $true
+    $HighScoresForm.Controls.Add($HardLabel)
+
+    $NameListBoxHard = New-Object System.Windows.Forms.ListBox
+    $NameListBoxHard.Location = New-Object System.Drawing.Point(10,400)
+    $NameListBoxHard.Size = New-Object System.Drawing.Size(100,20)
+    $NameListBoxHard.Height = 140
+    $HighScoresForm.Controls.Add($NameListBoxHard)
+
+    $ScoreListBoxHard = New-Object System.Windows.Forms.ListBox
+    $ScoreListBoxHard.Location = New-Object System.Drawing.Point(120,400)
+    $ScoreListBoxHard.Size = New-Object System.Drawing.Size(100,20)
+    $ScoreListBoxHard.Height = 140
+    $HighScoresForm.Controls.Add($ScoreListBoxHard)
+    
+    $DateListBoxHard = New-Object System.Windows.Forms.ListBox
+    $DateListBoxHard.Location = New-Object System.Drawing.Point(230,400)
+    $DateListBoxHard.Size = New-Object System.Drawing.Size(100,20)
+    $DateListBoxHard.Height = 140
+    $HighScoresForm.Controls.Add($DateListBoxHard)
+
+    $CurrentScores = Import-Csv -Path '.\scores.csv'
+    $CurrentScores | ForEach-Object {$_.Score = [int]$_.Score}
+
+    $EasyScores = @()
+    $EasyScores = $EasyScores + ($CurrentScores | Where-Object {$_.Mode -eq 'Easy'} | Sort-Object Score | Select-Object -First 11)
+    foreach($Score in $EasyScores){
+        if($Score.Score -ne 0){
+            $NameListBoxEasy.Items.Add($Score.Name), $ScoreListBoxEasy.Items.Add($Score.Score), $DateListBoxEasy.Items.Add($Score.Date)
+        }
+    }
+
+    $MediumScores = @()
+    $MediumScores = $MediumScores + ($CurrentScores | Where-Object {$_.Mode -eq 'Medium'} | Sort-Object Score | Select-Object -First 11)
+    foreach($Score in $MediumScores){
+        if($Score.Score -ne 0){
+            $NameListBoxMedium.Items.Add($Score.Name), $ScoreListBoxMedium.Items.Add($Score.Score), $DateListBoxMedium.Items.Add($Score.Date)
+        }
+    }
+
+    $HardScores = @()
+    $HardScores = $HardScores + ($CurrentScores | Where-Object {$_.Mode -eq 'Hard'} | Sort-Object Score | Select-Object -First 11)
+    foreach($Score in $HardScores){
+        if($Score.Score -ne 0){
+            $NameListBoxHard.Items.Add($Score.Name), $ScoreListBoxHard.Items.Add($Score.Score), $DateListBoxHard.Items.Add($Score.Date)
+        }
+    }
+
+
+    $HighScoresForm.ShowDialog() | Out-Null
+}
 
 ## start the game
 New-Game
