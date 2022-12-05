@@ -371,7 +371,7 @@ function Get-HighScores {
     $HighScoresForm = New-Object System.Windows.Forms.Form
     $HighScoresForm.Text = "High Scores"
     $System_Drawing_Size = New-Object System.Drawing.Size
-    $System_Drawing_Size.Height = 565
+    $System_Drawing_Size.Height = 575
     $System_Drawing_Size.Width = 340
     $HighScoresForm.FormBorderStyle = 'Fixed3D'
     $HighScoresForm.MaximizeBox = $false
@@ -381,16 +381,16 @@ function Get-HighScores {
     $HighScoresForm.add_Closing({$HighScoresForm.Dispose()})
     
     $HighScoresLabel = New-Object System.Windows.Forms.Label
-    $HighScoresLabel.Text = 'High Scores'
+    $HighScoresLabel.Text = '       User                   Sec.                  Date'
     $HighScoresLabel.Font = New-Object System.Drawing.Font("Microsoft Sans Serif", 12, [System.Drawing.FontStyle]::Regular)
-    $HighScoresLabel.Location = New-Object System.Drawing.Point(123,10)
+    $HighScoresLabel.Location = New-Object System.Drawing.Point(10,10)
     $HighScoresLabel.Autosize = $true
     $HighScoresForm.Controls.Add($HighScoresLabel)
 
     $EasyLabel = New-Object System.Windows.Forms.Label
     $EasyLabel.Text = 'Easy'
     $EasyLabel.Location = New-Object System.Drawing.Point(10,35)
-    $EasyLabel.Font = New-Object System.Drawing.Font("Microsoft Sans Serif", 10, [System.Drawing.FontStyle]::Regular)
+    $EasyLabel.Font = New-Object System.Drawing.Font("Microsoft Sans Serif", 9, [System.Drawing.FontStyle]::Bold)
     $EasyLabel.Autosize = $true
     $HighScoresForm.Controls.Add($EasyLabel)
     
@@ -415,7 +415,7 @@ function Get-HighScores {
     $MediumLabel = New-Object System.Windows.Forms.Label
     $MediumLabel.Text = 'Medium'
     $MediumLabel.Location = New-Object System.Drawing.Point(10,205)
-    $MediumLabel.Font = New-Object System.Drawing.Font("Microsoft Sans Serif", 10, [System.Drawing.FontStyle]::Regular)
+    $MediumLabel.Font = New-Object System.Drawing.Font("Microsoft Sans Serif", 9, [System.Drawing.FontStyle]::Bold)
     $MediumLabel.Autosize = $true
     $HighScoresForm.Controls.Add($MediumLabel)
 
@@ -440,7 +440,7 @@ function Get-HighScores {
     $HardLabel = New-Object System.Windows.Forms.Label
     $HardLabel.Text = 'Hard'
     $HardLabel.Location = New-Object System.Drawing.Point(10,375)
-    $HardLabel.Font = New-Object System.Drawing.Font("Microsoft Sans Serif", 10, [System.Drawing.FontStyle]::Regular)
+    $HardLabel.Font = New-Object System.Drawing.Font("Microsoft Sans Serif", 9, [System.Drawing.FontStyle]::Bold)
     $HardLabel.Autosize = $true
     $HighScoresForm.Controls.Add($HardLabel)
 
@@ -461,6 +461,13 @@ function Get-HighScores {
     $DateListBoxHard.Size = New-Object System.Drawing.Size(100,20)
     $DateListBoxHard.Height = 140
     $HighScoresForm.Controls.Add($DateListBoxHard)
+
+    $CloseButton = New-Object System.Windows.Forms.Button
+    $CloseButton.Text = "Close"
+    $CloseButton.Location = New-Object System.Drawing.Point(130, 545)
+    $CloseButton.Size = New-Object System.Drawing.Size(80,20)
+    $CloseButton.Add_Click({$HighScoresForm.Dispose()})
+    $HighScoresForm.Controls.Add($CloseButton)
 
     $CurrentScores = Import-Csv -Path '.\scores.csv'
     $CurrentScores | ForEach-Object {$_.Score = [int]$_.Score}
