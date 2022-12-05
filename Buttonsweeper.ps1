@@ -268,8 +268,10 @@ function Use-Button($ButtonObject) {
                     $MineButton.Text = "@"
                     }
             }else{
-                $ButtonObject.Visible = $false    
-                Find-Surrounding($ButtonObject)
+                $ButtonObject.Visible = $false
+                if($MineNeighbors -notcontains $ButtonObject){    
+                    Find-Surrounding($ButtonObject)
+                }
                 Test-IfWon 
                 }
             }
@@ -290,18 +292,18 @@ function Find-Surrounding($ButtonObj){
 
         foreach($Button in $ButtonsToCheck){
             
-            $SurroundingButtons = $Buttons | Where-Object {
-        
-                (($_.Location.X -eq $Button.Location.X) -and ($_.Location.Y -eq ($Button.Location.Y + 20))) -or # above
-                (($_.Location.X -eq $Button.Location.X) -and ($_.Location.Y -eq ($Button.Location.Y - 20))) -or # below
-                (($_.Location.X -eq ($Button.Location.X + 20)) -and ($_.Location.Y -eq $Button.Location.Y)) -or # left
-                (($_.Location.X -eq ($Button.Location.X - 20)) -and ($_.Location.Y -eq $Button.Location.Y)) -or # right
-                (($_.Location.X -eq ($Button.Location.X - 20)) -and ($_.Location.Y -eq ($Button.Location.Y -20))) -or # up left
-                (($_.Location.X -eq ($Button.Location.X + 20)) -and ($_.Location.Y -eq ($Button.Location.Y -20))) -or # up right
-                (($_.Location.X -eq ($Button.Location.X - 20)) -and ($_.Location.Y -eq ($Button.Location.Y +20))) -or # down left
-                (($_.Location.X -eq ($Button.Location.X + 20)) -and ($_.Location.Y -eq ($Button.Location.Y +20))) # down right
-    
-                }
+            $SurroundingButtons = @()
+            
+            foreach($CheckButton in $Buttons){
+                if(($CheckButton.Location.X -eq $Button.Location.X) -and ($CheckButton.Location.Y -eq ($Button.Location.Y + 20))){$SurroundingButtons += $CheckButton}
+                elseif(($CheckButton.Location.X -eq $Button.Location.X) -and ($CheckButton.Location.Y -eq ($Button.Location.Y - 20))){$SurroundingButtons += $CheckButton}
+                elseif(($CheckButton.Location.X -eq ($Button.Location.X + 20)) -and ($CheckButton.Location.Y -eq $Button.Location.Y)){$SurroundingButtons += $CheckButton}
+                elseif(($CheckButton.Location.X -eq ($Button.Location.X - 20)) -and ($CheckButton.Location.Y -eq $Button.Location.Y)){$SurroundingButtons += $CheckButton}
+                elseif(($CheckButton.Location.X -eq ($Button.Location.X - 20)) -and ($CheckButton.Location.Y -eq ($Button.Location.Y -20))){$SurroundingButtons += $CheckButton}
+                elseif(($CheckButton.Location.X -eq ($Button.Location.X + 20)) -and ($CheckButton.Location.Y -eq ($Button.Location.Y -20))){$SurroundingButtons += $CheckButton}
+                elseif(($CheckButton.Location.X -eq ($Button.Location.X - 20)) -and ($CheckButton.Location.Y -eq ($Button.Location.Y +20))){$SurroundingButtons += $CheckButton}
+                elseif(($CheckButton.Location.X -eq ($Button.Location.X + 20)) -and ($CheckButton.Location.Y -eq ($Button.Location.Y +20))){$SurroundingButtons += $CheckButton}
+            }
 
             foreach($SurButton in $SurroundingButtons){
                 if($MineButtons -notcontains $SurButton -and $SurButton.Visible -eq $true -and $SurButton.Text -ne '!' -and $SurButton.Text -ne '?'){
