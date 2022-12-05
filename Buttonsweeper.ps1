@@ -379,92 +379,85 @@ function Get-HighScores {
     $HighScoresForm.StartPosition = 'CenterScreen'
     $HighScoresForm.TopMost = $true
     $HighScoresForm.add_Closing({$HighScoresForm.Dispose()})
-    
-    $HighScoresLabel = New-Object System.Windows.Forms.Label
-    $HighScoresLabel.Text = '       User                   Sec.                  Date'
-    $HighScoresLabel.Font = New-Object System.Drawing.Font("Microsoft Sans Serif", 12, [System.Drawing.FontStyle]::Regular)
-    $HighScoresLabel.Location = New-Object System.Drawing.Point(10,10)
-    $HighScoresLabel.Autosize = $true
-    $HighScoresForm.Controls.Add($HighScoresLabel)
 
     $EasyLabel = New-Object System.Windows.Forms.Label
     $EasyLabel.Text = 'Easy'
-    $EasyLabel.Location = New-Object System.Drawing.Point(10,35)
-    $EasyLabel.Font = New-Object System.Drawing.Font("Microsoft Sans Serif", 9, [System.Drawing.FontStyle]::Bold)
+    $EasyLabel.Location = New-Object System.Drawing.Point(10,17)
+    $EasyLabel.Font = New-Object System.Drawing.Font("Microsoft Sans Serif", 11, [System.Drawing.FontStyle]::Italic)
     $EasyLabel.Autosize = $true
     $HighScoresForm.Controls.Add($EasyLabel)
     
     $NameListBoxEasy = New-Object System.Windows.Forms.ListBox
-    $NameListBoxEasy.Location = New-Object System.Drawing.Point(10,60)
+    $NameListBoxEasy.Location = New-Object System.Drawing.Point(10,40)
     $NameListBoxEasy.Size = New-Object System.Drawing.Size(100,20)
     $NameListBoxEasy.Height = 140
     $HighScoresForm.Controls.Add($NameListBoxEasy)
     
     $ScoreListBoxEasy = New-Object System.Windows.Forms.ListBox
-    $ScoreListBoxEasy.Location = New-Object System.Drawing.Point(120,60)
+    $ScoreListBoxEasy.Location = New-Object System.Drawing.Point(120,40)
     $ScoreListBoxEasy.Size = New-Object System.Drawing.Size(100,20)
     $ScoreListBoxEasy.Height = 140
     $HighScoresForm.Controls.Add($ScoreListBoxEasy)
     
     $DateListBoxEasy = New-Object System.Windows.Forms.ListBox
-    $DateListBoxEasy.Location = New-Object System.Drawing.Point(230,60)
+    $DateListBoxEasy.Location = New-Object System.Drawing.Point(230,40)
     $DateListBoxEasy.Size = New-Object System.Drawing.Size(100,20)
     $DateListBoxEasy.Height = 140
     $HighScoresForm.Controls.Add($DateListBoxEasy)
 
     $MediumLabel = New-Object System.Windows.Forms.Label
     $MediumLabel.Text = 'Medium'
-    $MediumLabel.Location = New-Object System.Drawing.Point(10,205)
-    $MediumLabel.Font = New-Object System.Drawing.Font("Microsoft Sans Serif", 9, [System.Drawing.FontStyle]::Bold)
+    $MediumLabel.Location = New-Object System.Drawing.Point(10,187)
+    $MediumLabel.Font = New-Object System.Drawing.Font("Microsoft Sans Serif", 11, [System.Drawing.FontStyle]::Italic)
     $MediumLabel.Autosize = $true
     $HighScoresForm.Controls.Add($MediumLabel)
 
     $NameListBoxMedium = New-Object System.Windows.Forms.ListBox
-    $NameListBoxMedium.Location = New-Object System.Drawing.Point(10,230)
+    $NameListBoxMedium.Location = New-Object System.Drawing.Point(10,210)
     $NameListBoxMedium.Size = New-Object System.Drawing.Size(100,20)
     $NameListBoxMedium.Height = 140
     $HighScoresForm.Controls.Add($NameListBoxMedium)
 
     $ScoreListBoxMedium = New-Object System.Windows.Forms.ListBox
-    $ScoreListBoxMedium.Location = New-Object System.Drawing.Point(120,230)
+    $ScoreListBoxMedium.Location = New-Object System.Drawing.Point(120,210)
     $ScoreListBoxMedium.Size = New-Object System.Drawing.Size(100,20)
     $ScoreListBoxMedium.Height = 140
     $HighScoresForm.Controls.Add($ScoreListBoxMedium)
     
     $DateListBoxMedium = New-Object System.Windows.Forms.ListBox
-    $DateListBoxMedium.Location = New-Object System.Drawing.Point(230,230)
+    $DateListBoxMedium.Location = New-Object System.Drawing.Point(230,210)
     $DateListBoxMedium.Size = New-Object System.Drawing.Size(100,20)
     $DateListBoxMedium.Height = 140
     $HighScoresForm.Controls.Add($DateListBoxMedium)
 
     $HardLabel = New-Object System.Windows.Forms.Label
     $HardLabel.Text = 'Hard'
-    $HardLabel.Location = New-Object System.Drawing.Point(10,375)
-    $HardLabel.Font = New-Object System.Drawing.Font("Microsoft Sans Serif", 9, [System.Drawing.FontStyle]::Bold)
+    $HardLabel.Location = New-Object System.Drawing.Point(10,357)
+    $HardLabel.Font = New-Object System.Drawing.Font("Microsoft Sans Serif", 11, [System.Drawing.FontStyle]::Italic)
     $HardLabel.Autosize = $true
     $HighScoresForm.Controls.Add($HardLabel)
 
     $NameListBoxHard = New-Object System.Windows.Forms.ListBox
-    $NameListBoxHard.Location = New-Object System.Drawing.Point(10,400)
+    $NameListBoxHard.Location = New-Object System.Drawing.Point(10,380)
     $NameListBoxHard.Size = New-Object System.Drawing.Size(100,20)
     $NameListBoxHard.Height = 140
     $HighScoresForm.Controls.Add($NameListBoxHard)
 
     $ScoreListBoxHard = New-Object System.Windows.Forms.ListBox
-    $ScoreListBoxHard.Location = New-Object System.Drawing.Point(120,400)
+    $ScoreListBoxHard.Location = New-Object System.Drawing.Point(120,380)
     $ScoreListBoxHard.Size = New-Object System.Drawing.Size(100,20)
     $ScoreListBoxHard.Height = 140
     $HighScoresForm.Controls.Add($ScoreListBoxHard)
     
     $DateListBoxHard = New-Object System.Windows.Forms.ListBox
-    $DateListBoxHard.Location = New-Object System.Drawing.Point(230,400)
+    $DateListBoxHard.Location = New-Object System.Drawing.Point(230,380)
     $DateListBoxHard.Size = New-Object System.Drawing.Size(100,20)
     $DateListBoxHard.Height = 140
     $HighScoresForm.Controls.Add($DateListBoxHard)
 
     $CloseButton = New-Object System.Windows.Forms.Button
     $CloseButton.Text = "Close"
-    $CloseButton.Location = New-Object System.Drawing.Point(130, 545)
+    $CloseButton.Location = New-Object System.Drawing.Point(130, 535)
     $CloseButton.Size = New-Object System.Drawing.Size(80,20)
     $CloseButton.Add_Click({$HighScoresForm.Dispose()})
     $HighScoresForm.Controls.Add($CloseButton)
