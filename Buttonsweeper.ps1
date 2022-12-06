@@ -189,18 +189,19 @@ function New-GameBoard($Size) {
     foreach($Button in $Buttons){
 
         $SurroundingMineCount = 0
-        $SurroundingMines = $MineButtons | Where-Object {
+        
+        $SurroundingMines = @()
             
-            (($_.Location.X -eq $Button.Location.X) -and ($_.Location.Y -eq ($Button.Location.Y + 20))) -or # above
-            (($_.Location.X -eq $Button.Location.X) -and ($_.Location.Y -eq ($Button.Location.Y - 20))) -or # below
-            (($_.Location.X -eq ($Button.Location.X + 20)) -and ($_.Location.Y -eq $Button.Location.Y)) -or # left
-            (($_.Location.X -eq ($Button.Location.X - 20)) -and ($_.Location.Y -eq $Button.Location.Y)) -or # right
-            (($_.Location.X -eq ($Button.Location.X - 20)) -and ($_.Location.Y -eq ($Button.Location.Y -20))) -or # up left
-            (($_.Location.X -eq ($Button.Location.X + 20)) -and ($_.Location.Y -eq ($Button.Location.Y -20))) -or # up right
-            (($_.Location.X -eq ($Button.Location.X - 20)) -and ($_.Location.Y -eq ($Button.Location.Y +20))) -or # down left
-            (($_.Location.X -eq ($Button.Location.X + 20)) -and ($_.Location.Y -eq ($Button.Location.Y +20))) # down right
-            
-            }
+        foreach($CheckButton in $MineButtons){
+            if(($CheckButton.Location.X -eq $Button.Location.X) -and ($CheckButton.Location.Y -eq ($Button.Location.Y + 20))){$SurroundingMines += $CheckButton}
+            if(($CheckButton.Location.X -eq $Button.Location.X) -and ($CheckButton.Location.Y -eq ($Button.Location.Y - 20))){$SurroundingMines += $CheckButton}
+            if(($CheckButton.Location.X -eq ($Button.Location.X + 20)) -and ($CheckButton.Location.Y -eq $Button.Location.Y)){$SurroundingMines += $CheckButton}
+            if(($CheckButton.Location.X -eq ($Button.Location.X - 20)) -and ($CheckButton.Location.Y -eq $Button.Location.Y)){$SurroundingMines += $CheckButton}
+            if(($CheckButton.Location.X -eq ($Button.Location.X - 20)) -and ($CheckButton.Location.Y -eq ($Button.Location.Y -20))){$SurroundingMines += $CheckButton}
+            if(($CheckButton.Location.X -eq ($Button.Location.X + 20)) -and ($CheckButton.Location.Y -eq ($Button.Location.Y -20))){$SurroundingMines += $CheckButton}
+            if(($CheckButton.Location.X -eq ($Button.Location.X - 20)) -and ($CheckButton.Location.Y -eq ($Button.Location.Y +20))){$SurroundingMines += $CheckButton}
+            if(($CheckButton.Location.X -eq ($Button.Location.X + 20)) -and ($CheckButton.Location.Y -eq ($Button.Location.Y +20))){$SurroundingMines += $CheckButton}
+        }
 
         foreach($Mine in $SurroundingMines){
             $SurroundingMineCount = $SurroundingMineCount + 1
