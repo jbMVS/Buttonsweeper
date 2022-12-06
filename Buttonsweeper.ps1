@@ -76,7 +76,9 @@ function New-GameBoard($Size) {
 
     $Script:Playing = $false
     $Script:Started = $false
+    $Script:FirstClear = $true
     $PlayedSec = 0
+    
 
     $timer = New-Object System.Windows.Forms.Timer
     $timer.Interval = 1000
@@ -269,8 +271,9 @@ function Use-Button($ButtonObject) {
                     }
             }else{
                 $ButtonObject.Visible = $false
-                if($MineNeighbors -notcontains $ButtonObject){    
+                if($MineNeighbors -notcontains $ButtonObject -or $Script:FirstClear -eq $true){    
                     Find-Surrounding($ButtonObject)
+                    $Script:FirstClear = $false
                 }
                 Test-IfWon 
                 }
@@ -490,7 +493,6 @@ function Get-HighScores {
             $NameListBoxHard.Items.Add($Score.Name), $ScoreListBoxHard.Items.Add($Score.Score), $DateListBoxHard.Items.Add($Score.Date)
         }
     }
-
 
     $HighScoresForm.ShowDialog() | Out-Null
 }
