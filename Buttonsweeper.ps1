@@ -110,11 +110,27 @@ function New-GameBoard($Size) {
     $GameForm.Controls.Add($TimerListBox)
     $TimerListBox.Items.Add($PlayedSec)
 
+    $TimerLabel = New-Object System.Windows.Forms.Label
+    $TimerLabel.Name = ('TimerLabel')
+    $TimerLabel.Text = '⏰' 
+    $TimerLabel.Font = [System.Drawing.Font]::new("Microsoft Sans Serif", 10, [System.Drawing.FontStyle]::Regular)
+    $TimerLabel.Location = New-Object System.Drawing.Point(((15+ (200 * $Size))-60),9)
+    $TimerLabel.Autosize = $true
+    $GameForm.Controls.Add($TimerLabel)
+
     $RemainderListBox = New-Object System.Windows.Forms.ListBox
     $RemainderListBox.Location = New-Object System.Drawing.Point(11, 8)
     $RemainderListBox.Size = New-Object System.Drawing.Size(34, 10)
     $RemainderListBox.Height = 20
     $GameForm.Controls.Add($RemainderListBox)
+
+    $RemainderLabel = New-Object System.Windows.Forms.Label
+    $RemainderLabel.Name = ('TimerLabel')
+    $RemainderLabel.Text = '@' 
+    $RemainderLabel.Font = [System.Drawing.Font]::new("Microsoft Sans Serif", 9, [System.Drawing.FontStyle]::Regular)
+    $RemainderLabel.Location = New-Object System.Drawing.Point((46),7)
+    $RemainderLabel.Autosize = $true
+    $GameForm.Controls.Add($RemainderLabel)
 
     ## button generation
     $StartPosX = 10
@@ -259,10 +275,6 @@ function Use-Button($ButtonObject) {
                 $Script:Playing = $false
                 $timer.stop()
                 $ButtonObject.BackColor = "Red"
-                $ButtonObject.Font = [System.Drawing.Font]::new("Microsoft Sans Serif", 7, [System.Drawing.FontStyle]::Bold)
-                $ButtonObject.TextAlign = [System.Drawing.ContentAlignment]::BottomLeft
-                $ButtonObject.ForeColor = "Black"
-                $ButtonObject.text = "@"
                 $NewGameButton.Text = "ಠ_ಠ" # ಠ_ಠ # = ( # more complicated face requires UTF-8 with BOM
                 foreach($MineButton in $MineButtons){
                     $MineButton.Font = [System.Drawing.Font]::new("Microsoft Sans Serif", 7, [System.Drawing.FontStyle]::Bold)
