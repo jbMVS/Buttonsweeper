@@ -95,17 +95,39 @@ function New-CustomBoard(){
     $CustomGameForm.TopMost = $true
     $CustomGameForm.add_Closing({$CustomGameForm.Dispose()})
 
-    $CustomSizeTextBox = New-Object System.Windows.Forms.TextBox
-    $CustomSizeTextBox.Location = New-Object System.Drawing.Point(10,40)
-    $CustomSizeTextBox.Size = New-Object System.Drawing.Size(60,20)
-    $CustomGameForm.Controls.Add($CustomSizeTextBox)
+    $CustomColumnTextBox = New-Object System.Windows.Forms.TextBox
+    $CustomColumnTextBox.Location = New-Object System.Drawing.Point(10,40)
+    $CustomColumnTextBox.Size = New-Object System.Drawing.Size(60,20)
+    $CustomGameForm.Controls.Add($CustomColumnTextBox)
 
-    $ScoreButton = New-Object System.Windows.Forms.Button
-    $ScoreButton.Text = "High Scores"
-    $ScoreButton.Location = New-Object System.Drawing.Point(110, 150)
-    $ScoreButton.Size = New-Object System.Drawing.Size(80,20)
-    $ScoreButton.Add_Click({Get-HighScores})
-    $CustomGameForm.Controls.Add($ScoreButton)
+    $CustomRowTextBox = New-Object System.Windows.Forms.TextBox
+    $CustomRowTextBox.Location = New-Object System.Drawing.Point(80,40)
+    $CustomRowTextBox.Size = New-Object System.Drawing.Size(60,20)
+    $CustomGameForm.Controls.Add($CustomRowTextBox)
+
+    $CustomAmountTextBox = New-Object System.Windows.Forms.TextBox
+    $CustomAmountTextBox.Location = New-Object System.Drawing.Point(150,40)
+    $CustomAmountTextBox.Size = New-Object System.Drawing.Size(60,20)
+    $CustomGameForm.Controls.Add($CustomAmountTextBox)
+
+    $GenerateCustomButton = New-Object System.Windows.Forms.Button
+    $GenerateCustomButton.Text = "Generate.."
+    $GenerateCustomButton.Location = New-Object System.Drawing.Point(110, 150)
+    $GenerateCustomButton.Size = New-Object System.Drawing.Size(80,20)
+    $GenerateCustomButton.Add_Click({
+        if($CustomColumnTextBox.Text -ne ""-and 
+            $CustomRowTextBox.Text -ne "" -and
+            $CustomAmountTextBox.Text -ne "" -and
+            $CustomColumnTextBox.Text -match "^\d+$" -and # regex for digit, i think?
+            $CustomRowTextBox.Text -match "^\d+$" -and # regex for digit, i think?
+            $CustomAmountTextBox.Text -match "^\d+$" # regex for digit, i think?
+            ){
+            #($Multiplier = 3), ($Script:PlayedSec = 0),($NewGameForm.Dispose()), (New-GameBoard($Multiplier))
+        }else{
+            [System.Windows.Forms.MessageBox]::Show(('You must enter a number in each field.'), $TopMessage)
+        }
+    })
+    $CustomGameForm.Controls.Add($GenerateCustomButton)
 
     $CustomGameForm.ShowDialog() | Out-Null
 }
@@ -180,15 +202,15 @@ function New-GameBoard($Size) {
     $StartPosX = 10
     $StartPosY = 30
     $StartPos = ($StartPosX, $StartPosY)
-    $BoxAmount = 1..(10 * $Size)
-    $RowAmount = 1..(10 * $Size)
+    $BoxAmount = 1..(10 * $Size) #10 * $Size
+    $RowAmount = 1..(10 * $Size) #10 * $Size
     $Count = 1
     
     switch($Size){
         (1) {$Script:MineAmount = 10} # easy number of mines
         (2) {$Script:MineAmount = 40} # medium number of mines
         (3) {$Script:MineAmount = 99} # hard number of mines
-        (4) {$Script:MineAmount = 300} # extreme number of mines
+        (4) {$Script:MineAmount = 250} # extreme number of mines
         (5) {$Script:MineAmount = $Script:CustomMineAmount}
         }
 
@@ -401,16 +423,20 @@ function Test-IfWon{
         (1) {$GameMode = 'Easy'} # easy number of mines
         (2) {$GameMode = 'Medium'} # medium number of mines
         (3) {$GameMode = 'Hard'} # hard number of mines
+        (4) {$GameMode = 'Extreme!'} # extreme number of mines
+        (5) {$GameMode = 'Custom'}
             }
         
         ## checks for high score
         $PlayerScore = $TimerListBox.Items
-        $ModeScores = $CurrentScores | Where-Object {$_.Mode -eq $GameMode} | Sort-Object Score | Select-Object -First 11
-        foreach($Score in $ModeScores){
-            if($PlayerScore -lt $Score.Score -or $ModeScores.Count -lt 11){
-                $TopMessage = "HIGH SCORE!"
-                $Today = (Get-Date).ToString('MM/dd/yy')
-                $TopScore = $true
+        if($GameMode -ne 'Custom'){
+            $ModeScores = $CurrentScores | Where-Object {$_.Mode -eq $GameMode} | Sort-Object Score | Select-Object -First 11
+            foreach($Score in $ModeScores){
+                if($PlayerScore -lt $Score.Score -or $ModeScores.Count -lt 11){
+                    $TopMessage = "HIGH SCORE!"
+                    $Today = (Get-Date).ToString('MM/dd/yy')
+                    $TopScore = $true
+                }
             }
         }
         if($TopScore -eq $true){
