@@ -39,28 +39,28 @@ function New-Game {
     $EasyButton.Text = "Easy"
     $EasyButton.Location = New-Object System.Drawing.Point(15, 80)
     $EasyButton.Size = New-Object System.Drawing.Size(80,20)
-    $EasyButton.Add_Click({($Multiplier = 1), ($Script:PlayedSec = 0), ($NewGameForm.Dispose()), (New-GameBoard($Multiplier))})
+    $EasyButton.Add_Click({($Script:PlayedSec = 0), ($NewGameForm.Dispose()), (New-GameBoard 10 10 10 'Easy')})
     $NewGameForm.Controls.Add($EasyButton)
 
     $MediumButton = New-Object System.Windows.Forms.Button
     $MediumButton.Text = "Medium"
     $MediumButton.Location = New-Object System.Drawing.Point(110, 80)
     $MediumButton.Size = New-Object System.Drawing.Size(80,20)
-    $MediumButton.Add_Click({($Multiplier = 2), ($Script:PlayedSec = 0), ($NewGameForm.Dispose()), (New-GameBoard($Multiplier))})
+    $MediumButton.Add_Click({($Script:PlayedSec = 0), ($NewGameForm.Dispose()), (New-GameBoard 20 20 40 'Medium')})
     $NewGameForm.Controls.Add($MediumButton)
 
     $HardButton = New-Object System.Windows.Forms.Button
     $HardButton.Text = "Hard"
     $HardButton.Location = New-Object System.Drawing.Point(205, 80)
     $HardButton.Size = New-Object System.Drawing.Size(80,20)
-    $HardButton.Add_Click({($Multiplier = 3), ($Script:PlayedSec = 0),($NewGameForm.Dispose()), (New-GameBoard($Multiplier))})
+    $HardButton.Add_Click({($Script:PlayedSec = 0), ($NewGameForm.Dispose()), (New-GameBoard 30 30 99 'Hard')})
     $NewGameForm.Controls.Add($HardButton)
 
     $ExtremeButton = New-Object System.Windows.Forms.Button
     $ExtremeButton.Text = "Extreme!"
     $ExtremeButton.Location = New-Object System.Drawing.Point(60, 115)
     $ExtremeButton.Size = New-Object System.Drawing.Size(80,20)
-    $ExtremeButton.Add_Click({($Multiplier = 4), ($Script:PlayedSec = 0),($NewGameForm.Dispose()), (New-GameBoard($Multiplier))})
+    $ExtremeButton.Add_Click({($Script:PlayedSec = 0), ($NewGameForm.Dispose()), (New-GameBoard 40 40 20 'Extreme')})
     $NewGameForm.Controls.Add($ExtremeButton)
 
     $CustomButton = New-Object System.Windows.Forms.Button
@@ -81,7 +81,7 @@ function New-Game {
     $NewGameForm.ShowDialog() | Out-Null
     }
 
-
+# custom board generation window
 function New-CustomBoard(){
     $CustomGameForm = New-Object System.Windows.Forms.Form
     $CustomGameForm.Text = "Custom Game"
@@ -120,11 +120,18 @@ function New-CustomBoard(){
             $CustomAmountTextBox.Text -ne "" -and
             $CustomColumnTextBox.Text -match "^\d+$" -and # regex for digit, i think?
             $CustomRowTextBox.Text -match "^\d+$" -and # regex for digit, i think?
-            $CustomAmountTextBox.Text -match "^\d+$" # regex for digit, i think?
+            $CustomAmountTextBox.Text -match "^\d+$" -and # regex for digit, i think?
+            [int]$CustomColumnTextBox.Text -gt 9 -and 
+            [int]$CustomRowTextBox.Text -gt 0 -and
+            [int]$CustomAmountTextBox.Text -gt 0
             ){
-            #($Multiplier = 3), ($Script:PlayedSec = 0),($NewGameForm.Dispose()), (New-GameBoard($Multiplier))
+                if(([int]$CustomColumnTextBox.Text * [int]$CustomRowTextBox.Text) -gt [int]$CustomAmountTextBox.Text){
+                    ($Script:PlayedSec = 0), ($NewGameForm.Dispose()), (New-GameBoard $CustomColumnTextBox.Text $CustomRowTextBox.Text $CustomAmountTextBox.Text 'Custom')
+                }else{
+                    [System.Windows.Forms.MessageBox]::Show(('Mine amount must be less than total button amount.'), $TopMessage)
+                }
         }else{
-            [System.Windows.Forms.MessageBox]::Show(('You must enter a number in each field.'), $TopMessage)
+            [System.Windows.Forms.MessageBox]::Show(('Minimum width: 10, Minimum height: 1, Minimum mine amount: 1'), $TopMessage)
         }
     })
     $CustomGameForm.Controls.Add($GenerateCustomButton)
@@ -133,7 +140,7 @@ function New-CustomBoard(){
 }
 
 ## generate game window
-function New-GameBoard($Size) {
+function New-GameBoard($XSize, $YSize, $Script:MineAmount, $GameMode) {
 
     try{$GameForm.Dispose(), $timer.Stop()}catch{}
 
@@ -153,8 +160,8 @@ function New-GameBoard($Size) {
     $GameForm = New-Object System.Windows.Forms.Form
     $GameForm.Text = "Buttonsweeper"
     $System_Drawing_Size = New-Object System.Drawing.Size
-    $System_Drawing_Size.Height = 40 + (200 * $Size)
-    $System_Drawing_Size.Width = 20 + (200 * $Size)
+    $System_Drawing_Size.Height = 40 + (20 * $YSize)
+    $System_Drawing_Size.Width = 20 + (20 * $XSize)
     $GameForm.FormBorderStyle = 'Fixed3D'
     $GameForm.MaximizeBox = $false
     $GameForm.ClientSize = $System_Drawing_Size
@@ -164,13 +171,13 @@ function New-GameBoard($Size) {
 
     $NewGameButton = New-Object System.Windows.Forms.Button
     $NewGameButton.Text = "ʘ‿ʘ" # ʘ‿ʘ # = ) # the more complicated face requires UTF-8 with BOM
-    $NewGameButton.Location = New-Object System.Drawing.Point(((100 * $Size)-20), 4)
+    $NewGameButton.Location = New-Object System.Drawing.Point(((10 * $XSize)-20), 4)
     $NewGameButton.Size = New-Object System.Drawing.Size(60,24)
     $NewGameButton.Add_Click({New-Game})
     $GameForm.Controls.Add($NewGameButton)
     
     $TimerListBox = New-Object System.Windows.Forms.ListBox
-    $TimerListBox.Location = New-Object System.Drawing.Point(((15+ (200 * $Size))-40),8)
+    $TimerListBox.Location = New-Object System.Drawing.Point(((20 * $XSize)-25),8)
     $TimerListBox.Size = New-Object System.Drawing.Size(34,10)
     $TimerListBox.Height = 20
     $GameForm.Controls.Add($TimerListBox)
@@ -180,7 +187,7 @@ function New-GameBoard($Size) {
     $TimerLabel.Name = ('TimerLabel')
     $TimerLabel.Text = '⏰' 
     $TimerLabel.Font = [System.Drawing.Font]::new("Microsoft Sans Serif", 10, [System.Drawing.FontStyle]::Regular)
-    $TimerLabel.Location = New-Object System.Drawing.Point(((15+ (200 * $Size))-60),9)
+    $TimerLabel.Location = New-Object System.Drawing.Point(((20 * $XSize)-45),9)
     $TimerLabel.Autosize = $true
     $GameForm.Controls.Add($TimerLabel)
 
@@ -202,17 +209,9 @@ function New-GameBoard($Size) {
     $StartPosX = 10
     $StartPosY = 30
     $StartPos = ($StartPosX, $StartPosY)
-    $BoxAmount = 1..(10 * $Size) #10 * $Size
-    $RowAmount = 1..(10 * $Size) #10 * $Size
+    $BoxAmount = 1..$XSize #10 * $Size
+    $RowAmount = 1..$YSize #10 * $Size
     $Count = 1
-    
-    switch($Size){
-        (1) {$Script:MineAmount = 10} # easy number of mines
-        (2) {$Script:MineAmount = 40} # medium number of mines
-        (3) {$Script:MineAmount = 99} # hard number of mines
-        (4) {$Script:MineAmount = 250} # extreme number of mines
-        (5) {$Script:MineAmount = $Script:CustomMineAmount}
-        }
 
     $RemainderListBox.Items.Add($Script:MineAmount)
     
@@ -419,13 +418,6 @@ function Test-IfWon{
         $TopMessage = ""
         $TopScore = $false
         $NewGameButton.Text = "(╯°□°）╯" # (╯°□°）╯ # = D # more complicated face requires UTF-8 with BOM
-        switch($Size){
-        (1) {$GameMode = 'Easy'} # easy number of mines
-        (2) {$GameMode = 'Medium'} # medium number of mines
-        (3) {$GameMode = 'Hard'} # hard number of mines
-        (4) {$GameMode = 'Extreme!'} # extreme number of mines
-        (5) {$GameMode = 'Custom'}
-            }
         
         ## checks for high score
         $PlayerScore = $TimerListBox.Items
@@ -450,10 +442,23 @@ function Test-IfWon{
 
 ## handle high score info
 $CurrentScores = Get-ChildItem -Path '.\scores.csv'  -ErrorAction SilentlyContinue
+
 if($null -eq $CurrentScores){
     'Name,Score,Date,Mode' | Out-File '.\scores.csv'
-    '0,0,0,Easy','0,0,0,Medium','0,0,0,Hard' | Out-File '.\scores.csv' -Append
+    '0,0,0,Easy','0,0,0,Medium','0,0,0,Hard','0,0,0,Extreme' | Out-File '.\scores.csv' -Append
 }
+
+## append Extreme mode score placeholder
+$ScoresCheck = Import-Csv $CurrentScores
+foreach($Score in $ScoresCheck){
+    if($Score -match '0,0,0,Extreme'){
+        $UpdatedScores = $true
+    }
+}
+if($UpdatedScores -eq $false){
+    '0,0,0,Extreme' | Out-File '.\scores.csv' -Append
+}
+##
 
 ## generates the high score window
 function Get-HighScores {
@@ -461,7 +466,7 @@ function Get-HighScores {
     $HighScoresForm = New-Object System.Windows.Forms.Form
     $HighScoresForm.Text = "High Scores"
     $System_Drawing_Size = New-Object System.Drawing.Size
-    $System_Drawing_Size.Height = 575
+    $System_Drawing_Size.Height = 750
     $System_Drawing_Size.Width = 340
     $HighScoresForm.FormBorderStyle = 'Fixed3D'
     $HighScoresForm.MaximizeBox = $false
@@ -545,9 +550,34 @@ function Get-HighScores {
     $DateListBoxHard.Height = 140
     $HighScoresForm.Controls.Add($DateListBoxHard)
 
+    $ExtremeLabel = New-Object System.Windows.Forms.Label
+    $ExtremeLabel.Text = 'Extreme!'
+    $ExtremeLabel.Location = New-Object System.Drawing.Point(10,527)
+    $ExtremeLabel.Font = New-Object System.Drawing.Font("Microsoft Sans Serif", 11, [System.Drawing.FontStyle]::Italic)
+    $ExtremeLabel.Autosize = $true
+    $HighScoresForm.Controls.Add($ExtremeLabel)
+
+    $NameListBoxExtreme = New-Object System.Windows.Forms.ListBox
+    $NameListBoxExtreme.Location = New-Object System.Drawing.Point(10,550)
+    $NameListBoxExtreme.Size = New-Object System.Drawing.Size(100,20)
+    $NameListBoxExtreme.Height = 140
+    $HighScoresForm.Controls.Add($NameListBoxExtreme)
+
+    $ScoreListBoxExtreme = New-Object System.Windows.Forms.ListBox
+    $ScoreListBoxExtreme.Location = New-Object System.Drawing.Point(120,550)
+    $ScoreListBoxExtreme.Size = New-Object System.Drawing.Size(100,20)
+    $ScoreListBoxExtreme.Height = 140
+    $HighScoresForm.Controls.Add($ScoreListBoxExtreme)
+    
+    $DateListBoxExtreme = New-Object System.Windows.Forms.ListBox
+    $DateListBoxExtreme.Location = New-Object System.Drawing.Point(230,550)
+    $DateListBoxExtreme.Size = New-Object System.Drawing.Size(100,20)
+    $DateListBoxExtreme.Height = 140
+    $HighScoresForm.Controls.Add($DateListBoxExtreme)
+
     $CloseButton = New-Object System.Windows.Forms.Button
     $CloseButton.Text = "Close"
-    $CloseButton.Location = New-Object System.Drawing.Point(130, 535)
+    $CloseButton.Location = New-Object System.Drawing.Point(130, 700)
     $CloseButton.Size = New-Object System.Drawing.Size(80,20)
     $CloseButton.Add_Click({$HighScoresForm.Dispose()})
     $HighScoresForm.Controls.Add($CloseButton)
@@ -576,6 +606,14 @@ function Get-HighScores {
     foreach($Score in $HardScores){
         if($Score.Score -ne 0){
             $NameListBoxHard.Items.Add($Score.Name), $ScoreListBoxHard.Items.Add($Score.Score), $DateListBoxHard.Items.Add($Score.Date)
+        }
+    }
+
+    $ExtremeScores = @()
+    $ExtremeScores = $ExtremeScores + ($CurrentScores | Where-Object {$_.Mode -eq 'Extreme'} | Sort-Object Score | Select-Object -First 11)
+    foreach($Score in $ExtremeScores){
+        if($Score.Score -ne 0){
+            $NameListBoxExtreme.Items.Add($Score.Name), $ScoreListBoxExtreme.Items.Add($Score.Score), $DateListBoxExtreme.Items.Add($Score.Date)
         }
     }
 
