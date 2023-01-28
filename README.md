@@ -2,7 +2,7 @@
 A mine game, in PowerShell.
 File must be saved as 'UTF-8 with BOM' in order for emoji faces to appear correctly (open in notepad and save-as).
 
-Buttonsweeper is a version of the game Minesweeper, written in PowerShell, taking advantage of .NET and System.Windows.Forms and System.Windows.Drawing.
+Buttonsweeper is a version of the game Minesweeper, written in PowerShell, taking advantage of .NET with System.Windows.Forms and System.Windows.Drawing.
 
 There are 4 modes; Easy, Medium, Hard, and Extreme.  A Custom game mode is included, though performance may vary depending on the values entered.
 
