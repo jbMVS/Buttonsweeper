@@ -1,4 +1,8 @@
 # Buttonsweeper
+
+![Capture](https://user-images.githubusercontent.com/88516542/216791102-dc8b20ae-856e-4d54-b3d5-38e5a7b20c41.JPG)
+
+
 A mine game, in PowerShell.
 File must be saved as 'UTF-8 with BOM' in order for emoji faces to appear correctly (open in notepad and save-as).
 
